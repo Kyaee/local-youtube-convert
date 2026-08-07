@@ -60,7 +60,7 @@ _MINUTE_TIMESTAMP = re.compile(r"^(?P<m>\d{1,2}):(?P<s>\d{2})[.,](?P<ms>\d{1,3})
 
 @dataclass(frozen=True)
 class CaptionTrack:
-    """One selected caption track before its payload is fetched.
+    """One selected caption track before its payload how to search in lazyvimis fetched.
 
     ``kind`` is ``"manual"`` or ``"auto"``; ``language`` is the code reported
     by yt-dlp (for example ``"en"`` or ``"pt-BR"``). Either ``url`` (download
