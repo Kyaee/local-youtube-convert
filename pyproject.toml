@@ -9,6 +9,7 @@ description = "Download YouTube media and generate local transcripts and summari
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "faster-whisper>=1.2.1",
     "yt-dlp>=2026.2.4",
 ]
 
