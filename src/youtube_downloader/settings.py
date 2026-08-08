@@ -41,9 +41,7 @@ def _validate_ollama_endpoint(endpoint: str) -> None:
         raise SettingsError(f"ollama_endpoint must be a non-blank URL, got {endpoint!r}")
     parsed = urlsplit(endpoint)
     if parsed.scheme.lower() not in _ALLOWED_SCHEMES or not parsed.netloc:
-        raise SettingsError(
-            f"ollama_endpoint must be an http(s) URL with a host, got {endpoint!r}"
-        )
+        raise SettingsError(f"ollama_endpoint must be an http(s) URL with a host, got {endpoint!r}")
     if parsed.username is not None or parsed.password is not None:
         raise SettingsError("ollama_endpoint must not embed user-info credentials")
     if not _is_loopback(parsed.hostname):

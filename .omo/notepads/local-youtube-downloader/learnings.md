@@ -89,3 +89,25 @@ _Auto-scaffolded by /start-work. Append new entries below - never overwrite._
 - **console-script/main entry points**: `raise SystemExit(main())` is required (not bare `main()`) so the int exit code propagates; both launchers stay at 4 lines. `main(argv=...)` must be passed `argv=[]` explicitly in tests — with `argv=None` argparse reads pytest's own `sys.argv` and exits 2 on unrecognized arguments.
 - **`_default_workflow` keeps service imports inside the factory function**, not at module level — matches the lazy-boundary style (asr/media/captions/summary all defer external imports anyway, but the CLI shouldn't even import the module code at import time). 213 pure LOC in cli.py: one noun phrase (interactive session + failure reporting), all private helpers serve `main()`.
 
+## Todo 9 (2026-08-08) — local setup and boundary documentation
+
+- The README now documents the actual launch paths (`python main.py` and `python -m youtube_downloader`), the required `.venv/bin/uv sync --all-groups` bootstrap, and `ffmpeg -version` preflight with platform-specific remediation.
+- Local-only processing must be stated narrowly: YouTube remains a network dependency for metadata, media, and captions; only caption fallback ASR and Ollama summarization are local.
+- The runtime defaults are `small` faster-whisper on `cpu`/`int8` and loopback Ollama at `http://127.0.0.1:11434` with model `llama3.2`; first ASR use downloads and caches the model from Hugging Face, so documentation calls out time and disk impact.
+- Output documentation follows `artifact_paths()`: `downloads/<safe-title> [<youtube-id>]/`, one `.mp3` or `.mp4`, `transcript.md`, `summary.md`, and `metadata.json`. Complete and partial status behavior is derived from the workflow's retained paths.
+- `tests/test_documentation.py` checks required commands, remedies, artifact names, recovery terms, and absence of API-key/cloud-provider setup instructions. Verified with 8 focused tests, 228 full-suite tests, Ruff, and basedpyright.
+
+## Todo 10 (2026-08-08) - quality gate evidence
+
+- The complete chained gate is green after Ruff formatted eight pre-existing files: 229 tests passed, basedpyright reported 0 errors/warnings/notes, and total coverage is 91% (1003 statements, 95 missed).
+- `_default_ydl_factory` had a real runtime defect: `cast(YdlParams, ...)` evaluated a TYPE_CHECKING-only name and raised `NameError`. The established string forward-reference cast pattern fixes it; a patched-yt-dlp regression test locks the behavior without network access.
+- Normal tests use injected fake yt-dlp, caption, Whisper, and Ollama boundaries. `pytest -m live` selected 0 of 229 tests and made no external calls; its exit code 5 is pytest's expected no-tests-selected status.
+
+## Final Wave F1 (2026-08-08) — completion requires declared artifacts
+
+- The workflow must validate both `MediaResult.final_path` and the declared `ArtifactPaths.media` immediately after the media service returns; an injected service can violate the media adapter's on-disk success contract even when it returns a `MediaResult`.
+- Completion is a transaction boundary, not just a stage label: media, transcript, and summary must exist before writing `status: complete`, and the report must only return after the atomic metadata write leaves all four declared artifacts present. The metadata path must not be treated as an existing artifact before that write.
+
+## Final Wave F2 (2026-08-08) — untrusted payload narrowing
+
+- External caption, media, HTTP JSON, and partial-metadata boundaries must validate container and nested entry shapes before applying typed casts; malformed captions remain an unavailable-caption signal, while media and summary failures preserve their typed remediation contracts.

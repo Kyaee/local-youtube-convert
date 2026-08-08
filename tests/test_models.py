@@ -66,9 +66,7 @@ def test_validate_url_strips_surrounding_whitespace() -> None:
 def test_download_request_summary_goal_defaults_to_none() -> None:
     request = DownloadRequest("https://youtu.be/dQw4w9WgXcQ", Format.MP4)
     assert request.summary_goal is None
-    goal = DownloadRequest(
-        "https://youtu.be/dQw4w9WgXcQ", Format.MP4, "summarize the key points"
-    )
+    goal = DownloadRequest("https://youtu.be/dQw4w9WgXcQ", Format.MP4, "summarize the key points")
     assert goal.summary_goal == "summarize the key points"
 
 

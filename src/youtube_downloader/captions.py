@@ -97,16 +97,22 @@ def _as_optional_str(value: object) -> str | None:
     return None
 
 
-def _tracks(info: Mapping[str, object], key: str) -> dict[str, list[dict[str, object]]]:
-    """Extract and type-claim the ``subtitles``/``automatic_captions`` mapping.
-
-    yt-dlp metadata is untyped external data; the cast is the
-    parse-at-the-boundary step that reduces it to a well-typed structure.
-    """
+def _tracks(info: Mapping[str, object], key: str) -> dict[str, list[Mapping[str, object]]]:
     raw = info.get(key)
-    if not isinstance(raw, dict):
+    if not isinstance(raw, Mapping):
         return {}
-    return cast(dict[str, list[dict[str, object]]], raw)
+    typed_raw = cast(Mapping[object, object], raw)
+    tracks: dict[str, list[Mapping[str, object]]] = {}
+    for language, raw_entries in typed_raw.items():
+        if not isinstance(language, str) or not isinstance(raw_entries, list):
+            continue
+        typed_entries = cast(list[object], raw_entries)
+        if not all(isinstance(entry, Mapping) for entry in typed_entries):
+            continue
+        entries = [cast(Mapping[str, object], entry) for entry in typed_entries]
+        if entries:
+            tracks[language] = entries
+    return tracks
 
 
 def _is_live_chat(language: str) -> bool:

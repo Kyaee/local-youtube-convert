@@ -8,7 +8,7 @@
       "plan_name": "local-youtube-downloader",
       "status": "active",
       "started_at": "2026-08-07T12:12:41.404Z",
-      "updated_at": "2026-08-07T13:38:05.640Z",
+      "updated_at": "2026-08-07T23:39:06.367Z",
       "session_ids": [
         "opencode:ses_024001534ffejepNbU1XLrKmCw"
       ],
@@ -89,6 +89,39 @@
           "updated_at": "2026-08-07T13:38:05.640Z",
           "started_at": "2026-08-07T13:38:05.640Z",
           "status": "running"
+        },
+        "todo:9": {
+          "task_key": "todo:9",
+          "task_label": "9",
+          "task_title": "Document local setup, operations, and boundaries",
+          "session_id": "opencode:ses_0219f65f8ffelj18lGqWpNOPLH",
+          "agent": "general",
+          "category": "",
+          "updated_at": "2026-08-07T22:42:54.021Z",
+          "started_at": "2026-08-07T22:42:54.021Z",
+          "status": "running"
+        },
+        "todo:10": {
+          "task_key": "todo:10",
+          "task_label": "10",
+          "task_title": "Run the complete automated quality gate and package the evidence",
+          "session_id": "opencode:ses_0219a4c96ffe498VCtS5EyhKxO",
+          "agent": "general",
+          "category": "",
+          "updated_at": "2026-08-07T22:48:12.219Z",
+          "started_at": "2026-08-07T22:48:12.219Z",
+          "status": "running"
+        },
+        "final-wave:f1": {
+          "task_key": "final-wave:f1",
+          "task_label": "F1",
+          "task_title": "Plan compliance audit",
+          "session_id": "opencode:ses_02169b633ffeCX8IYPX0jWKAze",
+          "agent": "general",
+          "category": "",
+          "started_at": "2026-08-07T22:55:47.308Z",
+          "status": "running",
+          "updated_at": "2026-08-07T23:39:06.368Z"
         }
       }
     }
@@ -96,7 +129,7 @@
   "active_plan": "/home/kyae-dev/Repos/self/youtube-mp4/.omo/plans/local-youtube-downloader.md",
   "started_at": "2026-08-07T12:12:41.404Z",
   "status": "active",
-  "updated_at": "2026-08-07T13:38:05.640Z",
+  "updated_at": "2026-08-07T23:39:06.367Z",
   "session_ids": [
     "opencode:ses_024001534ffejepNbU1XLrKmCw"
   ],
@@ -177,6 +210,39 @@
       "updated_at": "2026-08-07T13:38:05.640Z",
       "started_at": "2026-08-07T13:38:05.640Z",
       "status": "running"
+    },
+    "todo:9": {
+      "task_key": "todo:9",
+      "task_label": "9",
+      "task_title": "Document local setup, operations, and boundaries",
+      "session_id": "opencode:ses_0219f65f8ffelj18lGqWpNOPLH",
+      "agent": "general",
+      "category": "",
+      "updated_at": "2026-08-07T22:42:54.021Z",
+      "started_at": "2026-08-07T22:42:54.021Z",
+      "status": "running"
+    },
+    "todo:10": {
+      "task_key": "todo:10",
+      "task_label": "10",
+      "task_title": "Run the complete automated quality gate and package the evidence",
+      "session_id": "opencode:ses_0219a4c96ffe498VCtS5EyhKxO",
+      "agent": "general",
+      "category": "",
+      "updated_at": "2026-08-07T22:48:12.219Z",
+      "started_at": "2026-08-07T22:48:12.219Z",
+      "status": "running"
+    },
+    "final-wave:f1": {
+      "task_key": "final-wave:f1",
+      "task_label": "F1",
+      "task_title": "Plan compliance audit",
+      "session_id": "opencode:ses_02169b633ffeCX8IYPX0jWKAze",
+      "agent": "general",
+      "category": "",
+      "started_at": "2026-08-07T22:55:47.308Z",
+      "status": "running",
+      "updated_at": "2026-08-07T23:39:06.368Z"
     }
   },
   "agent": "atlas"

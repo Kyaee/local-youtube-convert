@@ -98,7 +98,7 @@ def _default_ydl_factory(options: Mapping[str, object]) -> MediaYdl:
     """Build a real ``yt_dlp.YoutubeDL``; imported lazily to keep the module import-free."""
     from yt_dlp import YoutubeDL
 
-    params = cast(YdlParams, cast(object, dict(options)))
+    params = cast("YdlParams", cast(object, dict(options)))
     return cast(MediaYdl, cast(object, YoutubeDL(params)))
 
 
@@ -232,7 +232,10 @@ def _recover_final_path(info: dict[str, object], url: str) -> Path:
     raw_requested = info.get("requested_downloads")
     if not isinstance(raw_requested, list) or not raw_requested:
         raise MediaDownloadError(f"yt-dlp reported no downloaded media for {url!r}")
-    requested = cast(list[dict[str, object]], raw_requested)
+    typed_requested = cast(list[object], raw_requested)
+    if not all(isinstance(entry, Mapping) for entry in typed_requested):
+        raise MediaDownloadError(f"yt-dlp reported malformed download state for {url!r}")
+    requested = [cast(Mapping[str, object], entry) for entry in typed_requested]
     last = requested[-1]
     filepath = last.get("filepath")
     if not isinstance(filepath, str) or not filepath:

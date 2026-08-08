@@ -16,7 +16,7 @@ import os
 import tempfile
 import urllib.error
 import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -195,14 +195,21 @@ def _parse_available_models(body: bytes) -> frozenset[str] | None:
     Returns ``None`` when the shape is invalid (unhealthy service).
     """
     try:
-        payload = cast(dict[str, object], json.loads(body))
+        decoded = cast(object, json.loads(body))
     except ValueError:
         return None
+    if not isinstance(decoded, Mapping):
+        return None
+    payload = cast(Mapping[str, object], decoded)
     models = payload.get("models")
     if not isinstance(models, list):
         return None
     names: set[str] = set()
-    for entry in cast(list[dict[str, object]], models):
+    typed_models = cast(list[object], models)
+    for raw_entry in typed_models:
+        if not isinstance(raw_entry, Mapping):
+            return None
+        entry = cast(Mapping[str, object], raw_entry)
         name = entry.get("name")
         if not isinstance(name, str):
             return None
@@ -213,9 +220,12 @@ def _parse_available_models(body: bytes) -> frozenset[str] | None:
 def _extract_generate_response(body: bytes) -> str | None:
     """Extract the non-blank ``response`` string, or ``None`` when invalid."""
     try:
-        payload = cast(dict[str, object], json.loads(body))
+        decoded = cast(object, json.loads(body))
     except ValueError:
         return None
+    if not isinstance(decoded, Mapping):
+        return None
+    payload = cast(Mapping[str, object], decoded)
     text = payload.get("response")
     if not isinstance(text, str) or not text.strip():
         return None

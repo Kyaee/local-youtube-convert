@@ -140,6 +140,21 @@ def test_select_caption_track_none_when_entries_unusable() -> None:
     assert select_caption_track(info) is None
 
 
+@pytest.mark.parametrize(
+    "info",
+    [
+        {"subtitles": [1]},
+        {"subtitles": {"en": [1]}},
+        {"automatic_captions": {"en": "not a list"}},
+        {"automatic_captions": {"en": [{"url": "ok"}, 1]}},
+    ],
+)
+def test_select_caption_track_ignores_malformed_metadata_shapes(
+    info: dict[str, object],
+) -> None:
+    assert select_caption_track(info) is None
+
+
 def test_normalize_language_primary_subtag() -> None:
     """Language codes reduce to their ISO 639-1 primary subtag."""
     assert normalize_language("en") == "en"

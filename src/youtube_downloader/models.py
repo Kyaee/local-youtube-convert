@@ -110,9 +110,7 @@ class Format(Enum):
         try:
             return cls(value.lower().strip())
         except (ValueError, AttributeError) as exc:
-            raise InvalidFormatError(
-                f"Unknown format {value!r}; choose 'mp3' or 'mp4'"
-            ) from exc
+            raise InvalidFormatError(f"Unknown format {value!r}; choose 'mp3' or 'mp4'") from exc
 
 
 @dataclass(frozen=True)

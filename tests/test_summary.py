@@ -17,7 +17,11 @@ from youtube_downloader.models import (
     SummaryError,
     TranscriptResult,
 )
-from youtube_downloader.summary import HttpResponse, OllamaSummarizer
+from youtube_downloader.summary import (
+    HttpResponse,
+    OllamaSummarizer,
+    _parse_available_models,
+)
 
 LOOPBACK_ENDPOINT = "http://127.0.0.1:11434"
 MODEL = "llama3.2"
@@ -123,6 +127,23 @@ def test_tags_http_error_raises_serve_remediation() -> None:
 
 def test_malformed_tags_body_raises_serve_remediation() -> None:
     transport = FakeTransport([HttpResponse(200, b"not json at all")])
+
+    with pytest.raises(SummaryError) as exc:
+        _build_summarizer(transport).summarize(_transcript("hello"), None)
+
+    assert "ollama serve" in str(exc.value)
+
+
+@pytest.mark.parametrize(
+    "body",
+    [b"[]", b'{"models": [1]}', b'{"models": [{"name": 1}]}'],
+)
+def test_malformed_tags_shapes_are_unavailable_models(body: bytes) -> None:
+    assert _parse_available_models(body) is None
+
+
+def test_malformed_tags_shapes_raise_serve_remediation() -> None:
+    transport = FakeTransport([HttpResponse(200, b'{"models": [1]}')])
 
     with pytest.raises(SummaryError) as exc:
         _build_summarizer(transport).summarize(_transcript("hello"), None)
@@ -286,6 +307,15 @@ def test_without_destination_writes_nothing_and_source_is_none(tmp_path: Path) -
 )
 def test_invalid_generate_response_raises_remediation(body: bytes) -> None:
     transport = FakeTransport([_tags_ok(), HttpResponse(200, body)])
+
+    with pytest.raises(SummaryError) as exc:
+        _build_summarizer(transport).summarize(_transcript("hello"), None)
+
+    assert "ollama pull llama3.2" in str(exc.value)
+
+
+def test_malformed_generate_root_raises_pull_remediation() -> None:
+    transport = FakeTransport([_tags_ok(), HttpResponse(200, b"[]")])
 
     with pytest.raises(SummaryError) as exc:
         _build_summarizer(transport).summarize(_transcript("hello"), None)

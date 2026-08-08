@@ -143,8 +143,7 @@ def test_successful_transcription_preserves_segment_order(tmp_path: Path) -> Non
     assert [segment.text for segment in result.segments] == ["one", "two", "three"]
     assert result.segments[1].start_seconds == 2.0
     assert all(
-        isinstance(segment.start_seconds, float)
-        and isinstance(segment.end_seconds, float)
+        isinstance(segment.start_seconds, float) and isinstance(segment.end_seconds, float)
         for segment in result.segments
     )
 
@@ -269,9 +268,7 @@ def test_empty_segments_raise_asr_error(tmp_path: Path) -> None:
 
 
 def test_non_monotonic_start_timestamps_raise_asr_error(tmp_path: Path) -> None:
-    fake = _FakeWhisperModel(
-        [_FakeSegment(2.0, 4.0, "first"), _FakeSegment(0.5, 3.0, "second")]
-    )
+    fake = _FakeWhisperModel([_FakeSegment(2.0, 4.0, "first"), _FakeSegment(0.5, 3.0, "second")])
 
     with pytest.raises(AsrError) as exc:
         _build_transcriber(fake).transcribe(_media(tmp_path))

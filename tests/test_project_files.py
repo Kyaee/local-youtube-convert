@@ -26,9 +26,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 def _gitignore_lines() -> set[str]:
     gitignore = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")
     return {
-        line.strip()
-        for line in gitignore.splitlines()
-        if line.strip() and not line.startswith("#")
+        line.strip() for line in gitignore.splitlines() if line.strip() and not line.startswith("#")
     }
 
 
@@ -41,6 +39,4 @@ def test_gitignore_contains_required_entry(entry: str) -> None:
 def test_gitignore_has_no_broad_patterns() -> None:
     lines = _gitignore_lines()
     for pattern in BROAD_PATTERNS:
-        assert pattern not in lines, (
-            f".gitignore contains unsupported broad pattern: {pattern!r}"
-        )
+        assert pattern not in lines, f".gitignore contains unsupported broad pattern: {pattern!r}"

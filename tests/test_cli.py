@@ -190,6 +190,21 @@ def test_partial_failure_reports_exact_retained_paths(tmp_path: Path) -> None:
     assert "complete" not in " ".join(out + error_out)
 
 
+def test_malformed_partial_metadata_is_ignored_while_reporting_service_error(
+    tmp_path: Path,
+) -> None:
+    directory = tmp_path / f"Some Title [{VIDEO_ID}]"
+    directory.mkdir()
+    (directory / "metadata.json").write_text("[1]")
+    workflow = FakeWorkflow(error=SummaryError("ollama down"))
+
+    exit_code, out, error_out = run_cli(tmp_path, [URL, "mp4", ""], workflow)
+
+    assert exit_code == 1
+    assert out == [f"Downloading {URL} as mp4 ..."]
+    assert error_out == ["error: ollama down"]
+
+
 def test_keyboard_interrupt_at_prompt_exits_nonzero_without_complete(
     tmp_path: Path,
 ) -> None:

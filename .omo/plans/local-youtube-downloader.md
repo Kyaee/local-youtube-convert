@@ -108,21 +108,21 @@ Your next move: run the plan in a worker session with `$start-work local-youtube
   Acceptance criteria (agent-executable): orchestration tests cover manual captions, automatic captions, ASR fallback, MP3 and MP4; each ends with media + `transcript.md` + `summary.md` + `metadata.json` and an accurate terminal report.
   QA scenarios (name the exact tool + invocation): happy: `uv run pytest tests/test_workflow.py`; failure: make each stage fail in turn and assert no false success, no partial metadata marked complete, and prior valid artifacts are accurately listed. Evidence `.omo/evidence/task-7-local-youtube-downloader.txt`.
   Commit: Y | `feat(workflow): require transcript and summary artifacts`
-- [ ] 8. Deliver a clear interactive CLI and compatibility entry point
+- [x] 8. Deliver a clear interactive CLI and compatibility entry point
   What to do / Must NOT do: Implement the typed CLI module and make the at-most-10-line `main.py` and `src/youtube_downloader/__main__.py` launchers only import and invoke its `main()` function. Prompt for URL, explicit MP3/MP4 decision, optional custom summary goal, and show preflight failures plus final artifact paths/status. Ensure Ctrl-C exits cleanly. Do not add a GUI/web server, process multiple URLs, or use `input()` while importing modules.
   Parallelization: Wave 2 | Blocked by: 7 | Blocks: 10
   References (executor has NO interview context - be exhaustive): `main.py:30-32`; Todo 7 workflow result contract; `.omo/drafts/local-youtube-downloader.md` interface decision.
   Acceptance criteria (agent-executable): CLI tests simulate an MP3 and MP4 session and assert the exact request passed to orchestration, a readable final report, nonzero exit on validation/preflight failure, and no prompts on module import.
   QA scenarios (name the exact tool + invocation): happy: `uv run pytest tests/test_cli.py`; failure: blank/invalid URL, unrecognized format answer, unavailable local model, and KeyboardInterrupt all exit safely without a completed claim. Evidence `.omo/evidence/task-8-local-youtube-downloader.txt`.
   Commit: Y | `feat(cli): add interactive format and summary choices`
-- [ ] 9. Document local setup, operations, and boundaries
+- [x] 9. Document local setup, operations, and boundaries
   What to do / Must NOT do: Write a concise README covering uv setup, an `ffmpeg -version` availability check, Ollama installation/start/model pull, first-time Whisper model download and disk-space impact, supported interaction, output artifacts, local-data boundary, and actionable limitation/recovery guidance. Explain that YouTube is still contacted and restricted/unavailable videos cannot be guaranteed. Do not claim offline YouTube downloads, API-key requirements, a specific FFmpeg minimum version not documented by yt-dlp, or successful transcripts for silent/unavailable media.
   Parallelization: Wave 2 | Blocked by: 1, 7 | Blocks: 10
   References (executor has NO interview context - be exhaustive): installed yt-dlp metadata `:280-288`; faster-whisper official README Requirements and model-download behavior; Ollama official local API docs; scope guardrails in this plan.
   Acceptance criteria (agent-executable): a documentation test/check verifies all executable commands and required artifact names appear; a fresh-environment checklist maps every preflight error to a README remedy.
   QA scenarios (name the exact tool + invocation): happy: `uv run pytest tests/test_documentation.py`; failure: test that no API-key or cloud-provider instruction appears and that restricted-video handling is explicitly documented. Evidence `.omo/evidence/task-9-local-youtube-downloader.txt`.
   Commit: Y | `docs: document local downloader setup and limits`
-- [ ] 10. Run the complete automated quality gate and package the evidence
+- [x] 10. Run the complete automated quality gate and package the evidence
   What to do / Must NOT do: Run formatting, linting, type checks, the entire test suite, and a no-network normal-test audit; fix only defects found within approved scope. Save raw command outputs and coverage summary under `.omo/evidence/`. Do not add live YouTube, real ASR, or real Ollama calls to the default quality gate.
   Parallelization: Wave 2 | Blocked by: 7, 8, 9 | Blocks: final wave
   References (executor has NO interview context - be exhaustive): Verification strategy in this plan; Todos 1-9 acceptance criteria; `.omo/drafts/local-youtube-downloader.md` Scope OUT.

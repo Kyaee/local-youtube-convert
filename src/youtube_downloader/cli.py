@@ -123,7 +123,7 @@ def _prompt_goal(prompt: PromptFunc) -> str | None:
     return goal or None
 
 
-def _latest_partial_payload(output_root: Path) -> dict[str, object] | None:
+def _latest_partial_payload(output_root: Path) -> Mapping[str, object] | None:
     """Return the most recent ``status == "partial"`` metadata payload, if any.
 
     The workflow writes ``metadata.json`` with retained artifact paths when a
@@ -133,15 +133,16 @@ def _latest_partial_payload(output_root: Path) -> dict[str, object] | None:
     """
     if not output_root.is_dir():
         return None
-    best: tuple[float, dict[str, object]] | None = None
+    best: tuple[float, Mapping[str, object]] | None = None
     for candidate in output_root.rglob("metadata.json"):
         try:
-            payload = cast(
-                dict[str, object], json.loads(candidate.read_text(encoding="utf-8"))
-            )
+            decoded = cast(object, json.loads(candidate.read_text(encoding="utf-8")))
             modified = candidate.stat().st_mtime
         except (OSError, ValueError):
             continue
+        if not isinstance(decoded, Mapping):
+            continue
+        payload = cast(Mapping[str, object], decoded)
         if payload.get("status") != "partial":
             continue
         if best is None or modified > best[0]:
@@ -149,7 +150,7 @@ def _latest_partial_payload(output_root: Path) -> dict[str, object] | None:
     return None if best is None else best[1]
 
 
-def _retained_paths(payload: dict[str, object]) -> list[str]:
+def _retained_paths(payload: Mapping[str, object]) -> list[str]:
     raw = payload.get("retained_paths")
     if not isinstance(raw, list):
         return []

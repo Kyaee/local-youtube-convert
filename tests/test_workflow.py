@@ -10,6 +10,7 @@ from youtube_downloader.models import (
     CaptionsUnavailableError,
     DownloadRequest,
     Format,
+    MediaDownloadError,
     MediaResult,
     Segment,
     SummaryError,
@@ -45,6 +46,15 @@ class FakeMedia:
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(b"media")
         return MediaResult(destination, VIDEO_ID, TITLE, uploader="Tester")
+
+
+@dataclass
+class MissingMedia:
+    def extract_metadata(self, url: str) -> dict[str, object]:
+        return {"id": VIDEO_ID, "title": TITLE}
+
+    def download(self, request: DownloadRequest, destination: Path) -> MediaResult:
+        return MediaResult(destination, VIDEO_ID, TITLE)
 
 
 @dataclass
@@ -191,9 +201,7 @@ def test_summary_failure_never_claims_complete(tmp_path: Path) -> None:
     with pytest.raises(SummaryError, match="ollama down"):
         workflow.run(DownloadRequest(URL, Format.MP4))
 
-    metadata = json.loads(
-        (tmp_path / "A Test Video [abc123]" / "metadata.json").read_text()
-    )
+    metadata = json.loads((tmp_path / "A Test Video [abc123]" / "metadata.json").read_text())
     assert metadata["status"] == "partial"
     assert metadata["completed_stage"] == "transcript"
     assert (tmp_path / "A Test Video [abc123]" / "transcript.md").is_file()
@@ -209,3 +217,15 @@ def test_media_failure_propagates_without_metadata_or_false_completion(tmp_path:
     directory = tmp_path / "A Test Video [abc123]"
     assert not (directory / "metadata.json").exists()
     assert not directory.exists()
+
+
+def test_missing_media_artifact_never_claims_complete(tmp_path: Path) -> None:
+    workflow = make_workflow(tmp_path, media=MissingMedia())
+
+    with pytest.raises(MediaDownloadError, match="media artifact"):
+        workflow.run(DownloadRequest(URL, Format.MP4))
+
+    directory = tmp_path / "A Test Video [abc123]"
+    assert not (directory / "metadata.json").exists()
+    assert not (directory / "transcript.md").exists()
+    assert not (directory / "summary.md").exists()

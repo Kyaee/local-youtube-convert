@@ -16,6 +16,7 @@ from youtube_downloader.models import (
     CaptionsUnavailableError,
     DownloadRequest,
     MediaDownloader,
+    MediaDownloadError,
     Summarizer,
     SummaryError,
     SummaryResult,
@@ -63,13 +64,16 @@ def _write_atomic_json(path: Path, payload: Metadata) -> None:
 
 
 def _artifact_values(paths: ArtifactPaths) -> dict[str, JsonValue]:
-    return {name: str(value) for name, value in {
-        "directory": paths.directory,
-        "media": paths.media,
-        "transcript": paths.transcript,
-        "summary": paths.summary,
-        "metadata": paths.metadata,
-    }.items()}
+    return {
+        name: str(value)
+        for name, value in {
+            "directory": paths.directory,
+            "media": paths.media,
+            "transcript": paths.transcript,
+            "summary": paths.summary,
+            "metadata": paths.metadata,
+        }.items()
+    }
 
 
 def _summary_markdown(result: SummaryResult) -> str:
@@ -137,6 +141,12 @@ class DownloadWorkflow:
         paths = artifact_paths(self._settings.output_root, title, video_id, request.format)
         metadata = self._metadata(request, video_id, title, paths)
         media_result = self._media.download(request, paths.media)
+        if not media_result.final_path.is_file() or not paths.media.is_file():
+            raise MediaDownloadError(
+                "Media downloader reported success, but the media artifact "
+                + f"{str(paths.media)!r} or final path {str(media_result.final_path)!r} "
+                + "does not exist"
+            )
         metadata["completed_stage"] = "media"
         try:
             transcript = self._transcript(video_id, media_result.final_path)
@@ -156,10 +166,23 @@ class DownloadWorkflow:
             metadata["retained_paths"] = _retained(paths)
             _write_atomic_json(paths.metadata, metadata)
             raise
+        if not all(path.is_file() for path in (paths.media, paths.transcript, paths.summary)):
+            raise MediaDownloadError(
+                "Cannot mark the download complete because a declared media, "
+                + "transcript, or summary artifact is missing"
+            )
         metadata["status"] = "complete"
         metadata["completed_stage"] = "complete"
         metadata["retained_paths"] = _retained(paths)
         _write_atomic_json(paths.metadata, metadata)
+        if not all(
+            path.is_file()
+            for path in (paths.media, paths.transcript, paths.summary, paths.metadata)
+        ):
+            raise MediaDownloadError(
+                "Cannot report completion because a declared artifact is missing after "
+                + "metadata write"
+            )
         return self._report(metadata)
 
     def _metadata(

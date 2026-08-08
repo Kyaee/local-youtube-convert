@@ -15,7 +15,11 @@ from pathlib import Path
 import pytest
 from yt_dlp.utils import DownloadError
 
-from youtube_downloader.media import YtDlpMediaDownloader
+from youtube_downloader.media import (
+    YtDlpMediaDownloader,
+    _default_ydl_factory,
+    _recover_final_path,
+)
 from youtube_downloader.models import (
     DownloadRequest,
     Format,
@@ -112,6 +116,19 @@ def make_downloader(
 
 def test_ytdl_downloader_satisfies_protocol() -> None:
     assert isinstance(YtDlpMediaDownloader(), MediaDownloader)
+
+
+def test_default_ydl_factory_builds_without_runtime_type_name_error(mocker) -> None:
+    class FakeYoutubeDL:
+        def __init__(self, options: object) -> None:
+            self.options = options
+
+    mocker.patch("yt_dlp.YoutubeDL", FakeYoutubeDL)
+
+    result = _default_ydl_factory({"quiet": True})
+
+    assert isinstance(result, FakeYoutubeDL)
+    assert result.options == {"quiet": True}
 
 
 def test_mp3_and_mp4_option_maps_differ(tmp_path: Path) -> None:
@@ -262,6 +279,11 @@ def test_no_real_final_file_never_succeeds(
     factory = FakeFactory(script)
     with pytest.raises(MediaDownloadError):
         make_downloader(factory).download(DownloadRequest(URL, Format.MP4), tmp_path / MP4_DEST)
+
+
+def test_malformed_requested_download_entry_raises_media_download_error() -> None:
+    with pytest.raises(MediaDownloadError, match="download state"):
+        _recover_final_path({"requested_downloads": [1]}, URL)
 
 
 def test_retry_transient_failure_succeeds_on_second_attempt(tmp_path: Path) -> None:
